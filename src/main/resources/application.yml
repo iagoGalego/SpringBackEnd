@@ -1,0 +1,7 @@
+server:
+  port: 8080
+  contextPath: /
+spring:
+  data:
+    mongodb:
+      uri: mongodb://user:user@localhost:27017/questionnaires_db
