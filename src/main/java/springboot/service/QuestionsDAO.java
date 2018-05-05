@@ -40,17 +40,29 @@ public class QuestionsDAO implements IQuestionsDAO {
 
     @Override
     public void insertQuestion(Question question) {
+        ArrayList<Tag> tags = new ArrayList<>();
         for(Tag tag : question.getTags()){
-            if(!isTagExist(tag)) tagRepository.insert(tag);
+            if(!isTagExist(tag)) {
+                tagRepository.insert(tag);
+                tags.add(tag);
+            }
+            else tags.add(tagRepository.findByValue(tag.getValue().getStringValue()));
         }
+        question.setTags(tags);
         questionRepository.insert(question);
     }
 
     @Override
     public Question updateQuestion(Question question) {
+        ArrayList<Tag> tags = new ArrayList<>();
         for(Tag tag : question.getTags()){
-            if(!isTagExist(tag)) tagRepository.insert(tag);
+            if(!isTagExist(tag)) {
+                tagRepository.insert(tag);
+                tags.add(tag);
+            }
+            else tags.add(tagRepository.findByValue(tag.getValue().getStringValue()));
         }
+        question.setTags(tags);
         questionRepository.deleteByURI(question.getURI());
         return questionRepository.save(question);
     }

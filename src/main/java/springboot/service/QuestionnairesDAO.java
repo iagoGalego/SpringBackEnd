@@ -75,17 +75,29 @@ public class QuestionnairesDAO implements IQuestionnairesDAO {
 
     @Override
     public void insertQuestionnaire(Questionnaire questionnaire) {
+        ArrayList<Tag> tags = new ArrayList<>();
         for(Tag tag : questionnaire.getTags()){
-            if(!isTagExist(tag)) tagRepository.insert(tag);
+            if(!isTagExist(tag)) {
+                tagRepository.insert(tag);
+                tags.add(tag);
+            }
+            else tags.add(tagRepository.findByValue(tag.getValue().getStringValue()));
         }
+        questionnaire.setTags(tags);
         questionnaireRepository.insert(questionnaire);
     }
 
     @Override
     public Questionnaire updateQuestionnaire(Questionnaire questionnaire) {
+        ArrayList<Tag> tags = new ArrayList<>();
         for(Tag tag : questionnaire.getTags()){
-            if(!isTagExist(tag)) tagRepository.insert(tag);
+            if(!isTagExist(tag)) {
+                tagRepository.insert(tag);
+                tags.add(tag);
+            }
+            else tags.add(tagRepository.findByValue(tag.getValue().getStringValue()));
         }
+        questionnaire.setTags(tags);
         questionnaireRepository.deleteByURI(questionnaire.getURI());
         return questionnaireRepository.save(questionnaire);
     }

@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import springboot.service.IQuestionsDAO;
+import springboot.service.ITagsDAO;
 import springboot.service.QuestionnaireRepository;
 import springboot.util.CustomErrorType;
 
