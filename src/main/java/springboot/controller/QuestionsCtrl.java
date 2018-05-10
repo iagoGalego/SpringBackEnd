@@ -29,6 +29,7 @@ public class QuestionsCtrl {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<List<Question>> listAllQuestions() {
+        logger.info("Fetching all the Questions");
         List<Question> questions = questionsDAO.findAllQuestions();
         if (questions.isEmpty()) {
             return new ResponseEntity(new CustomErrorType("No questions found"),
@@ -37,13 +38,13 @@ public class QuestionsCtrl {
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<?> getQuestion(@PathVariable("id") String id) {
-        logger.info("Fetching User with id {}", id);
-        Question question = questionsDAO.findByURI(id);
+    @RequestMapping(value = "/{uri}", method = RequestMethod.GET)
+    public ResponseEntity<?> getQuestion(@PathVariable("uri") String uri) {
+        logger.info("Fetching Question with uri {}", uri);
+        Question question = questionsDAO.findByURI(uri);
         if (question == null) {
-            logger.error("User with id {} not found.", id);
-            return new ResponseEntity(new CustomErrorType("User with id " + id
+            logger.error("Question with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Question with uri " + uri
                     + " not found"), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(question, HttpStatus.OK);
@@ -51,13 +52,13 @@ public class QuestionsCtrl {
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> createQuestion(@RequestBody Question question, @RequestParam(value = "questionnaire", required = false) String questionnaire, UriComponentsBuilder ucBuilder) {
-        logger.info("Creating User : {}", question);
+        logger.info("Creating Question : {}", question);
 
         question.genURI();
         if (questionsDAO.isQuestionExist(question)) {
-            logger.error("Unable to create. A User with name '{}' already exist", question.getStatement());
-            return new ResponseEntity(new CustomErrorType("Unable to create. A User with name '" +
-                    question.getStatement() + "' already exist."),HttpStatus.CONFLICT);
+            logger.error("Unable to create. A Question with uri '{}' already exist", question.getURI());
+            return new ResponseEntity(new CustomErrorType("Unable to create. A Question with uri '" +
+                    question.getURI() + "' already exist."),HttpStatus.CONFLICT);
         }
         questionsDAO.insertQuestion(question);
         Questionnaire q = questionnairesDAO.findByURI(questionnaire);
@@ -65,19 +66,19 @@ public class QuestionsCtrl {
         questionnairesDAO.updateQuestionnaire(q);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(ucBuilder.path("/{id}").buildAndExpand(question.getURI()).toUri());
+        headers.setLocation(ucBuilder.path("questions/{id}").buildAndExpand(question.getURI()).toUri());
         return new ResponseEntity<String>(headers, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<?> updateQuestion(@PathVariable("id") String id, @RequestBody Question question, @RequestParam(value = "questionnaire", required = false) String questionnaire) {
-        logger.info("Updating User with id {}", id);
+    @RequestMapping(value = "/{uri}", method = RequestMethod.PUT)
+    public ResponseEntity<?> updateQuestion(@PathVariable("uri") String uri, @RequestBody Question question, @RequestParam(value = "questionnaire", required = false) String questionnaire) {
+        logger.info("Updating Question with uri {}", uri);
 
-        Question currentQuestion = questionsDAO.findByURI(id);
+        Question currentQuestion = questionsDAO.findByURI(uri);
 
         if (currentQuestion == null) {
-            logger.error("Unable to update. User with id {} not found.", id);
-            return new ResponseEntity(new CustomErrorType("Unable to upate. User with id " + id + " not found."),
+            logger.error("Unable to update. Question with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Unable to update. Question with uri " + uri + " not found."),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -96,18 +97,17 @@ public class QuestionsCtrl {
         return new ResponseEntity<>(currentQuestion, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteQuestion(@PathVariable("id") String id, @RequestParam(value = "questionnaire", required = false) String questionnaire) {
-        logger.info("Fetching & Deleting User with id {}", id);
+    @RequestMapping(value = "/{uri}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteQuestion(@PathVariable("uri") String uri, @RequestParam(value = "questionnaire", required = false) String questionnaire) {
+        logger.info("Fetching & Deleting Question with uri {}", uri);
 
-        Question question = questionsDAO.findByURI(id);
-        question.setURI(id);
+        Question question = questionsDAO.findByURI(uri);
         if (question == null) {
-            logger.error("Unable to delete. User with id {} not found.", id);
-            return new ResponseEntity(new CustomErrorType("Unable to delete. User with id " + id + " not found."),
+            logger.error("Unable to delete. Question with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Unable to delete. Question with uri " + uri + " not found."),
                     HttpStatus.NOT_FOUND);
         }
-        questionsDAO.deleteQuestionByURI(id);
+        questionsDAO.deleteQuestionByURI(uri);
         Questionnaire q = questionnairesDAO.findByURI(questionnaire);
         q.removeQuestions(question);
         questionnairesDAO.updateQuestionnaire(q);
@@ -117,7 +117,7 @@ public class QuestionsCtrl {
 
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     public ResponseEntity<Question> deleteAllQuestions() {
-        logger.info("Deleting All Users");
+        logger.info("Deleting All the Questions");
 
         questionsDAO.deleteAllQuestions();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

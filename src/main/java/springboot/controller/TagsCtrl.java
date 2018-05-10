@@ -28,6 +28,7 @@ public class TagsCtrl {
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity<List<Tag>> listAllTags(@RequestParam(value = "name", required = false) String name) {
         if(name == null){
+            logger.info("Fetching all the Tags");
             List<Tag> tags = tagsDAO.findAllTags();
             if (tags.isEmpty()) {
                 return new ResponseEntity(new CustomErrorType("No tags found"),
@@ -35,12 +36,12 @@ public class TagsCtrl {
             }
             return new ResponseEntity<>(tags, HttpStatus.OK);
         } else{
-            logger.info("Fetching User with id {}", name);
+            logger.info("Fetching Tags with name like '{}'", name);
             List<Tag> tags = tagsDAO.findByValue(name);
             if (tags.isEmpty()) {
-                logger.error("User with id {} not found.", name);
-                return new ResponseEntity(new CustomErrorType("User with id " + name
-                        + " not found"), HttpStatus.NOT_FOUND);
+                logger.error("Tags with name like '{}' not found.", name);
+                return new ResponseEntity(new CustomErrorType("Tags with name like '" + name
+                        + "' not found"), HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(tags, HttpStatus.OK);
         }

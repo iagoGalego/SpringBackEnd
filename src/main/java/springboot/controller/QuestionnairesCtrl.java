@@ -33,21 +33,32 @@ public class QuestionnairesCtrl {
     IQuestionsDAO questionsDAO;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public ResponseEntity<List<Questionnaire>> listAllQuestionnaires(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "tags", required = false) List<String> tags) {
-        if(name == null && tags == null){
+    public ResponseEntity<List<Questionnaire>> listAllQuestionnaires(@RequestParam(value = "value", required = false) String value, @RequestParam(value = "name", required = false) String name, @RequestParam(value = "tags", required = false) List<String> tags) {
+        if(value != null){
+            logger.info("Fetching Questionnaires with name or tags like '{}'", value);
+            List<Questionnaire> questionnaires = questionnairesDAO.findByNameOrTag(value);
+            if (questionnaires.isEmpty()) {
+                logger.error("Questionnaires with name or tag '{}' not found.", value);
+                return new ResponseEntity(new CustomErrorType("Questionnaires with name or tags " + value
+                        + " not found"), HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(questionnaires, HttpStatus.OK);
+        }
+        else if(name != null && tags != null){
+            logger.info("Fetching Questionnaires with name '{}' and tags like '{}'", name, tags.toString());
+            List<Questionnaire> questionnaires = questionnairesDAO.findByNameWithTags(name, tags);
+            if (questionnaires.isEmpty()) {
+                logger.error("Questionnaires with name '{}' and tags like '{}' not found", name, tags.toString());
+                return new ResponseEntity(new CustomErrorType("Questionnaires with name '"+ name +
+                        "' and tags like '"+tags.toString()+"' not found"), HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(questionnaires, HttpStatus.OK);
+        } else{
+            logger.info("Fetching all the Questionnaires");
             List<Questionnaire> questionnaires = questionnairesDAO.findAllQuestionnaires();
             if (questionnaires.isEmpty()) {
                 return new ResponseEntity(new CustomErrorType("No questionnaires found"),
                         HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(questionnaires, HttpStatus.OK);
-        } else{
-            logger.info("Fetching User with id {}", name);
-            List<Questionnaire> questionnaires = questionnairesDAO.findByNameWithTags(name, tags);
-            if (questionnaires.isEmpty()) {
-                logger.error("User with id {} not found.", name);
-                return new ResponseEntity(new CustomErrorType("User with id " + name
-                        + " not found"), HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(questionnaires, HttpStatus.OK);
         }
@@ -56,12 +67,12 @@ public class QuestionnairesCtrl {
 
     @RequestMapping(value = "/{uri}", method = RequestMethod.GET)
     public ResponseEntity<?> getQuestionnaireByUri(@PathVariable("uri") String uri) {
-        logger.info("Fetching User with id {}", uri);
+        logger.info("Fetching Questionnaire with uri {}", uri);
         Questionnaire questionnaire = questionnairesDAO.findByURI(uri);
 
         if (questionnaire == null) {
-            logger.error("User with id {} not found.", uri);
-            return new ResponseEntity(new CustomErrorType("User with id " + uri
+            logger.error("Questionnaire with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Questionnaire with uri " + uri
                     + " not found"), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(questionnaire, HttpStatus.OK);
@@ -69,41 +80,41 @@ public class QuestionnairesCtrl {
 
     @RequestMapping(value = "/name/{name}", method = RequestMethod.GET)
     public ResponseEntity<?> getQuestionnairesByName(@PathVariable("name") String name) {
-        logger.info("Fetching User with id {}", name);
+        logger.info("Fetching Questionnaires with name like '{}'", name);
         List<Questionnaire> questionnaires = questionnairesDAO.findByName(name);
         if (questionnaires.isEmpty()) {
-            logger.error("User with id {} not found.", name);
-            return new ResponseEntity(new CustomErrorType("User with id " + name
-                    + " not found"), HttpStatus.NOT_FOUND);
+            logger.error("Questionnaires with name like '{}' not found.", name);
+            return new ResponseEntity(new CustomErrorType("Questionnaires with name like '" + name
+                    + "' not found"), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(questionnaires, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<?> createQuestionnaire(@RequestBody Questionnaire questionnaire, UriComponentsBuilder ucBuilder) {
-        logger.info("Creating User : {}", questionnaire.getURI());
+        logger.info("Creating Questionnaire : {}", questionnaire.getURI());
         questionnaire.genURI();
         if (questionnairesDAO.isQuestionnaireExist(questionnaire)) {
-            logger.error("Unable to create. A User with uri {} already exist", questionnaire.getURI());
-            return new ResponseEntity(new CustomErrorType("Unable to create. A User with name " +
-                    questionnaire.getName() + " already exist."),HttpStatus.CONFLICT);
+            logger.error("Unable to create. A Questionnaire with uri {} already exist", questionnaire.getURI());
+            return new ResponseEntity(new CustomErrorType("Unable to create. A Questionnaire with uri " +
+                    questionnaire.getURI() + " already exist."),HttpStatus.CONFLICT);
         }
         questionnairesDAO.insertQuestionnaire(questionnaire);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(ucBuilder.path("/{uri}").buildAndExpand(questionnaire.getURI()).toUri());
+        headers.setLocation(ucBuilder.path("questionnaires/{uri}").buildAndExpand(questionnaire.getURI()).toUri());
         return new ResponseEntity<String>(headers, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{uri}", method = RequestMethod.PUT)
     public ResponseEntity<?> updateQuestionnaire(@PathVariable("uri") String uri, @RequestBody Questionnaire questionnaire) {
-        logger.info("Updating User with id {}", uri);
+        logger.info("Updating Questionnaire with uri {}", uri);
 
         Questionnaire currentQuestionnaire = questionnairesDAO.findByURI(uri);
 
         if (currentQuestionnaire == null) {
-            logger.error("Unable to update. User with id {} not found.", uri);
-            return new ResponseEntity(new CustomErrorType("Unable to upate. User with id " + uri + " not found."),
+            logger.error("Unable to update. Questionnaire with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Unable to update. Questionnaire with uri " + uri + " not found."),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -117,12 +128,12 @@ public class QuestionnairesCtrl {
 
     @RequestMapping(value = "/{uri}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteQuestionnaire(@PathVariable("uri") String uri) {
-        logger.info("Fetching & Deleting User with id {}", uri);
+        logger.info("Fetching & Deleting Questionnaire with uri {}", uri);
 
         Questionnaire questionnaire = questionnairesDAO.findByURI(uri);
         if (questionnaire == null) {
-            logger.error("Unable to delete. User with id {} not found.", uri);
-            return new ResponseEntity(new CustomErrorType("Unable to delete. User with id " + uri + " not found."),
+            logger.error("Unable to delete. Questionnaire with uri {} not found.", uri);
+            return new ResponseEntity(new CustomErrorType("Unable to delete. Questionnaire with uri " + uri + " not found."),
                     HttpStatus.NOT_FOUND);
         }
         for(Question question : questionnaire.getQuestions()){
@@ -134,7 +145,7 @@ public class QuestionnairesCtrl {
 
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     public ResponseEntity<Questionnaire> deleteAllQuestionnaires() {
-        logger.info("Deleting All Users");
+        logger.info("Deleting All Questionnaires");
 
         questionnairesDAO.deleteAllQuestionnaires();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -142,12 +153,12 @@ public class QuestionnairesCtrl {
 
     @RequestMapping(value = "/{uri}", method = RequestMethod.POST)
     public ResponseEntity<?> addQuestion(@PathVariable("uri") String uri, @RequestBody Question question, UriComponentsBuilder ucBuilder) {
-        logger.info("Creating User : {}", question);
+        logger.info("Adding question {} to questionnaire {}", question.getURI(), uri);
 
         questionnairesDAO.addQuestion(uri, question);
 
-        //HttpHeaders headers = new HttpHeaders();
-        //headers.setLocation(ucBuilder.path("/{uri}").buildAndExpand(questionnaire.getURI()).toUri());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(ucBuilder.path("questions/{uri}").buildAndExpand(question.getURI()).toUri());
+        return new ResponseEntity<String>(headers, HttpStatus.CREATED);
     }
 }

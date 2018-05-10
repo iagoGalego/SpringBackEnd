@@ -31,7 +31,7 @@ public class LoginCtrl {
 
         String jwtToken = "";
         if (user.getUser() == null || user.getPass() == null) {
-            return new ResponseEntity(new CustomErrorType(""),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new CustomErrorType("User with no username or password"),HttpStatus.BAD_REQUEST);
         }
         jwtToken = Jwts.builder().setSubject(user.getUser()).claim("roles", "user").setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS256, "secretkey").compact();

@@ -11,6 +11,7 @@ public interface IQuestionnairesDAO {
     Questionnaire findByURI(String uri);
     List<Questionnaire> findByName(String name);
     List<Questionnaire> findByNameWithTags(String name, List<String> tags);
+    List<Questionnaire> findByNameOrTag(String value);
     Boolean isQuestionnaireExist(Questionnaire questionnaire);
     void insertQuestionnaire(Questionnaire questionnaire);
     Questionnaire updateQuestionnaire(Questionnaire questionnaire);

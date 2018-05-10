@@ -5,6 +5,7 @@ import es.usc.citius.hmb.games.Questionnaire;
 import es.usc.citius.hmb.games.Tag;
 import es.usc.citius.hmb.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,9 +20,11 @@ public class QuestionnairesDAO implements IQuestionnairesDAO {
     @Autowired
     TagRepository tagRepository;
 
+    private Sort sort = new Sort(Sort.Direction.ASC, "name.stringValue");
+
     @Override
     public List<Questionnaire> findAllQuestionnaires() {
-        return questionnaireRepository.findAll();
+        return questionnaireRepository.findAll(sort);
     }
 
     @Override
@@ -31,15 +34,15 @@ public class QuestionnairesDAO implements IQuestionnairesDAO {
 
     @Override
     public List<Questionnaire> findByName(String name){
-        if(name.equals("*")) return questionnaireRepository.findAll();
-        else return questionnaireRepository.getByNameRegexQuery(name);
+        if(name.equals("*")) return questionnaireRepository.findAll(sort);
+        else return questionnaireRepository.getByNameRegexQuery(name, sort);
     }
 
     @Override
     public List<Questionnaire> findByNameWithTags(String name, List<String> tags){
         List<Questionnaire> response, questionnaires;
-        if(name == null) questionnaires = questionnaireRepository.findAll();
-        else questionnaires = questionnaireRepository.getByNameRegexQuery(name);
+        if(name == null) questionnaires = questionnaireRepository.findAll(sort);
+        else questionnaires = questionnaireRepository.getByNameRegexQuery(name, sort);
         response = new ArrayList<>();
         Boolean isValid, condition;
         for(Questionnaire q : questionnaires){
@@ -61,6 +64,39 @@ public class QuestionnairesDAO implements IQuestionnairesDAO {
         }
         return response;
     }
+
+    @Override
+    public List<Questionnaire> findByNameOrTag(String value){
+        List<Questionnaire> response, questionnaires1, questionnaires2;
+        questionnaires1 = questionnaireRepository.findAll(sort);
+        questionnaires2 = questionnaireRepository.getByNameRegexQuery(value, sort);
+
+        response = new ArrayList<>();
+        for(Questionnaire q : questionnaires1){
+            if(containsTag(q, value)) response.add(q);
+        }
+
+        for(Questionnaire q : questionnaires2){
+            if(!containsQuestionnaire(response,q)) response.add(q);
+        }
+
+        return response;
+    }
+
+    private Boolean containsTag(Questionnaire q, String tag){
+        for(Tag tg : q.getTags()){
+            if(tg.getValue().getStringValue().equals(tag)) return true;
+        }
+        return false;
+    }
+
+    private Boolean containsQuestionnaire(List<Questionnaire> questionnaires, Questionnaire questionnaire){
+        for(Questionnaire q : questionnaires){
+            if(q.getURI().equals(questionnaire.getURI())) return true;
+        }
+        return false;
+    }
+
 
     @Override
     public Boolean isQuestionnaireExist(Questionnaire questionnaire) {

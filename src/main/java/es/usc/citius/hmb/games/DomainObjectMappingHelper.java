@@ -1,15 +1,15 @@
 package es.usc.citius.hmb.games;
 
-//import es.usc.citius.hmb.sdk.mapping.URIClassMapper;
-//import es.usc.citius.hmb.sdk.plugin.annotations.MappingClassProvider;
+import es.usc.citius.hmb.sdk.mapping.URIClassMapper;
+import es.usc.citius.hmb.sdk.plugin.annotations.MappingClassProvider;
 
 import java.util.Map;
 import java.util.HashMap;
 
+@MappingClassProvider
+public class DomainObjectMappingHelper implements URIClassMapper {
 
-public class DomainObjectMappingHelper {
-
-    /*private static final Map<String, Class> uriToClass = new HashMap<>();
+    private static final Map<String, Class> uriToClass = new HashMap<>();
     private static final Map<Class, String> classToUri = new HashMap<>();
     static {
 
@@ -58,6 +58,15 @@ public class DomainObjectMappingHelper {
             uriToClass.put("http://citius.usc.es/hmb/citius.owl#InsertVariousTextsQuestion", es.usc.citius.hmb.games.InsertVariousTextsQuestion.class);
 		    classToUri.put(es.usc.citius.hmb.games.InsertVariousTextsQuestion.class, "http://citius.usc.es/hmb/citius.owl#InsertVariousTextsQuestion");
 
+            uriToClass.put("http://citius.usc.es/hmb/citius.owl#FillInTheBlanksQuestionType", es.usc.citius.hmb.games.FillInTheBlanksQuestionType.class);
+		    classToUri.put(es.usc.citius.hmb.games.FillInTheBlanksQuestionType.class, "http://citius.usc.es/hmb/citius.owl#FillInTheBlanksQuestionType");
+
+            uriToClass.put("http://citius.usc.es/hmb/citius.owl#SimpleFillInTheBlanksQuestion", es.usc.citius.hmb.games.SimpleFillInTheBlanksQuestion.class);
+		    classToUri.put(es.usc.citius.hmb.games.SimpleFillInTheBlanksQuestion.class, "http://citius.usc.es/hmb/citius.owl#SimpleFillInTheBlanksQuestion");
+
+            uriToClass.put("http://citius.usc.es/hmb/citius.owl#MultipleFillInTheBlanksQuestion", es.usc.citius.hmb.games.MultipleFillInTheBlanksQuestion.class);
+		    classToUri.put(es.usc.citius.hmb.games.MultipleFillInTheBlanksQuestion.class, "http://citius.usc.es/hmb/citius.owl#MultipleFillInTheBlanksQuestion");
+
             uriToClass.put("http://citius.usc.es/hmb/citius.owl#Questionnaire", es.usc.citius.hmb.games.Questionnaire.class);
 		    classToUri.put(es.usc.citius.hmb.games.Questionnaire.class, "http://citius.usc.es/hmb/citius.owl#Questionnaire");
 
@@ -82,6 +91,12 @@ public class DomainObjectMappingHelper {
             uriToClass.put("http://citius.usc.es/hmb/citius.owl#InsertVariousTextsQuestionAnswer", es.usc.citius.hmb.games.InsertVariousTextsQuestionAnswer.class);
 		    classToUri.put(es.usc.citius.hmb.games.InsertVariousTextsQuestionAnswer.class, "http://citius.usc.es/hmb/citius.owl#InsertVariousTextsQuestionAnswer");
 
+            uriToClass.put("http://citius.usc.es/hmb/citius.owl#SimpleFillInTheBlanksQuestionAnswer", es.usc.citius.hmb.games.SimpleFillInTheBlanksQuestionAnswer.class);
+		    classToUri.put(es.usc.citius.hmb.games.SimpleFillInTheBlanksQuestionAnswer.class, "http://citius.usc.es/hmb/citius.owl#SimpleFillInTheBlanksQuestionAnswer");
+
+            uriToClass.put("http://citius.usc.es/hmb/citius.owl#MultipleFillInTheBlanksQuestionAnswer", es.usc.citius.hmb.games.MultipleFillInTheBlanksQuestionAnswer.class);
+		    classToUri.put(es.usc.citius.hmb.games.MultipleFillInTheBlanksQuestionAnswer.class, "http://citius.usc.es/hmb/citius.owl#MultipleFillInTheBlanksQuestionAnswer");
+
             uriToClass.put("http://citius.usc.es/hmb/citius.owl#TrueFalseQuestionAnswer", es.usc.citius.hmb.games.TrueFalseQuestionAnswer.class);
 		    classToUri.put(es.usc.citius.hmb.games.TrueFalseQuestionAnswer.class, "http://citius.usc.es/hmb/citius.owl#TrueFalseQuestionAnswer");
 
@@ -99,5 +114,5 @@ public class DomainObjectMappingHelper {
 
     public String getUriForClass(Class classs) {
         return classToUri.get(classs);
-    }*/
+    }
 }
